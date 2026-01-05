@@ -37,6 +37,13 @@ func handleConn(conn net.Conn) {
 			logger.Log.Warn("Disconnected: ", conn.RemoteAddr())
 			return
 		}
+
+		logger.Log.Infof(
+			"RECV %d bytes from %s",
+			n,
+			conn.RemoteAddr(),
+		)
+
 		parser.ParseAndLog(buf[:n])
 	}
 }
