@@ -1,64 +1,42 @@
 package main
 
 import (
-	"encoding/hex"
 	"fleet-monior/logger"
 	"fleet-monior/parser"
-	"github.com/sirupsen/logrus"
 	"net"
 )
 
 func main() {
-	log := logger.New(logrus.InfoLevel)
-	parser := parser.New(log.Logger)
+	logger.Init() // ⬅️ WAJIB DIPANGGIL
+
+	logger.Log.Info("TCP Server starting on :9000")
 
 	listener, err := net.Listen("tcp", ":9000")
 	if err != nil {
-		log.WithError(err).Fatal("failed to start server")
+		logger.Log.Fatal(err)
 	}
-
-	log.WithField("port", 9000).
-		Info("tcp server started")
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.WithError(err).Warn("accept failed")
 			continue
 		}
 
-		log.WithField("remote", conn.RemoteAddr().String()).
-			Info("client connected")
-
-		go handleConn(conn, log, parser)
+		logger.Log.Info("Connected: ", conn.RemoteAddr())
+		go handleConn(conn)
 	}
 }
 
-func handleConn(conn net.Conn, log *logger.Logger, parser *parser.Parser) {
-	defer func() {
-		log.WithField("remote", conn.RemoteAddr().String()).
-			Info("client disconnected")
-		conn.Close()
-	}()
-
+func handleConn(conn net.Conn) {
+	defer conn.Close()
 	buf := make([]byte, 1024)
 
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			log.WithError(err).
-				WithField("remote", conn.RemoteAddr().String()).
-				Warn("read error")
+			logger.Log.Warn("Disconnected: ", conn.RemoteAddr())
 			return
 		}
-
-		data := buf[:n]
-
-		log.WithFields(logrus.Fields{
-			"bytes": n,
-			"raw":   hex.EncodeToString(data),
-		}).Debug("packet received")
-
-		parser.Parse(data)
+		parser.ParseAndLog(buf[:n])
 	}
 }
