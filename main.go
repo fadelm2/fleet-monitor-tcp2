@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	logger.Init() // ⬅️ WAJIB DIPANGGIL
+	logger.Init()
 
-	logger.Log.Info("TCP Server starting on :9000")
+	logger.Log.Info("🚀 TCP Server listening on :9000")
 
 	listener, err := net.Listen("tcp", ":9000")
 	if err != nil {
@@ -22,7 +22,7 @@ func main() {
 			continue
 		}
 
-		logger.Log.Info("Connected: ", conn.RemoteAddr())
+		logger.Log.Infof("🔌 CONNECTED %s", conn.RemoteAddr())
 		go handleConn(conn)
 	}
 }
@@ -34,16 +34,11 @@ func handleConn(conn net.Conn) {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
-			logger.Log.Warn("Disconnected: ", conn.RemoteAddr())
+			logger.Log.Warnf("❌ DISCONNECTED %s", conn.RemoteAddr())
 			return
 		}
 
-		logger.Log.Infof(
-			"RECV %d bytes from %s",
-			n,
-			conn.RemoteAddr(),
-		)
-
+		logger.Log.Infof("📥 RECV %d bytes from %s", n, conn.RemoteAddr())
 		parser.ParseAndLog(buf[:n])
 	}
 }
