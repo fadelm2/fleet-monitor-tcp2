@@ -7,6 +7,7 @@ import (
 
 func ParseAndLog(data []byte) {
 	if len(data) < 20 {
+		logger.Log.Warnf("Packet too short: %d bytes", len(data))
 		return
 	}
 
