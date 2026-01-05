@@ -9,9 +9,10 @@ import (
 func main() {
 	logger.Init()
 
-	logger.Log.Info("🚀 TCP Server listening on :9000")
+	addr := ":9000"
+	logger.Log.Infof("🚀 TCP Server listening on %s", addr)
 
-	listener, err := net.Listen("tcp", ":9000")
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		logger.Log.Fatal(err)
 	}
@@ -29,6 +30,7 @@ func main() {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
+
 	buf := make([]byte, 1024)
 
 	for {
